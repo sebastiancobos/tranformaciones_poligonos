@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transformación de Figura</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #6e45e2, #88d3ce);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+        }
+
+        canvas {
+            border: 2px solid #fff;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: transform 0.5s ease;
+        }
+
+        form {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .range-value {
+            font-weight: normal;
+            margin-left: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px 20px;
+            background-color: #ff6f61;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #e65b50;
+        }
+    </style>
+</head>
+<body>
+    <form id="transform-form">
+        <label>
+            Trasladar X: <span class="range-value" id="translateXValue">0</span>
+            <input type="range" id="translateX" min="-200" max="200" value="0">
+        </label>
+        <label>
+            Trasladar Y: <span class="range-value" id="translateYValue">0</span>
+            <input type="range" id="translateY" min="-200" max="200" value="0">
+        </label>
+        <label>
+            Escalar (%): <span class="range-value" id="scaleValue">100%</span>
+            <input type="range" id="scale" min="10" max="200" value="100">
+        </label>
+        <label>
+            Rotar (grados): <span class="range-value" id="rotateValue">0</span>
+            <input type="range" id="rotate" min="0" max="360" value="0">
+        </label>
+        <button type="button" id="applyTransform">Aplicar Transformación</button>
+    </form>
+
+    <canvas id="canvas" width="400" height="400"></canvas>
+
+    <script>
+        // Obtener el contexto del canvas
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Obtener referencias a los elementos de los deslizadores
+        const translateXInput = document.getElementById('translateX');
+        const translateYInput = document.getElementById('translateY');
+        const scaleInput = document.getElementById('scale');
+        const rotateInput = document.getElementById('rotate');
+
+        const translateXValue = document.getElementById('translateXValue');
+        const translateYValue = document.getElementById('translateYValue');
+        const scaleValue = document.getElementById('scaleValue');
+        const rotateValue = document.getElementById('rotateValue');
+
+        // Actualizar los valores de los deslizadores
+        translateXInput.addEventListener('input', () => {
+            translateXValue.textContent = translateXInput.value;
+        });
+
+        translateYInput.addEventListener('input', () => {
+            translateYValue.textContent = translateYInput.value;
+        });
+
+        scaleInput.addEventListener('input', () => {
+            scaleValue.textContent = scaleInput.value;
+        });
+
+        rotateInput.addEventListener('input', () => {
+            rotateValue.textContent = rotateInput.value;
+        });
+
+        // Función para dibujar una bola roja con ojos
+        function dibujarBola(x, y, tamaño) {
+            // Dibujar la bola
+            ctx.beginPath();
+            ctx.arc(x, y, tamaño, 0, Math.PI * 2);
+            ctx.fillStyle = '#ff6f61';
+            ctx.fill();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#fff';
+            ctx.stroke();
+
+            // Dibujar los ojos
+            ctx.beginPath();
+            ctx.arc(x - tamaño / 3, y - tamaño / 3, tamaño / 5, 0, Math.PI * 2);
+            ctx.arc(x + tamaño / 3, y - tamaño / 3, tamaño / 5, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+
+            // Dibujar las pupilas
+            ctx.beginPath();
+            ctx.arc(x - tamaño / 3, y - tamaño / 3, tamaño / 10, 0, Math.PI * 2);
+            ctx.arc(x + tamaño / 3, y - tamaño / 3, tamaño / 10, 0, Math.PI * 2);
+            ctx.fillStyle = '#000';
+            ctx.fill();
+        }
+
+        // Función para aplicar las transformaciones y dibujar la figura
+        function aplicarTransformacion() {
+            // Limpiar el canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Obtener valores de los inputs
+            const translateX = parseInt(translateXInput.value);
+            const translateY = parseInt(translateYInput.value);
+            const scalePercentage = parseFloat(scaleInput.value);
+            const rotateDegrees = parseFloat(rotateInput.value);
+
+            // Calcular el escalado en base a 100%
+            const scale = scalePercentage / 100;
+
+            // Convertir la rotación de grados a radianes
+            const rotateRadians = rotateDegrees * Math.PI / 180;
+
+            // Guardar el estado original del canvas
+            ctx.save();
+
+            // Trasladar el canvas al centro de la bola
+            ctx.translate(translateX + 200, translateY + 200);
+
+            // Aplicar la rotación
+            ctx.rotate(rotateRadians);
+
+            // Aplicar el escalado
+            ctx.scale(scale, scale);
+
+            // Dibujar la bola transformada
+            dibujarBola(0, 0, 50);
+
+            // Restaurar el estado original del canvas
+            ctx.restore();
+        }
+
+        // Evento para aplicar las transformaciones cuando se hace clic en el botón
+        document.getElementById('applyTransform').addEventListener('click', aplicarTransformacion);
+
+        // Dibujar la bola original en la carga inicial
+        dibujarBola(200, 200, 50);
+    </script>
+</html>
